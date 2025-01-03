@@ -1,6 +1,6 @@
 namespace registerUser_API_2.Endpoints;
 
-using registerUser_API_2.Dtos;
+using registerUser_API_2.Dtos.User;
 using registerUser_API_2.Utils.User;
 
 public static class UserEndpoints

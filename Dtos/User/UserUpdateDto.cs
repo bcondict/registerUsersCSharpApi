@@ -1,4 +1,4 @@
-namespace registerUser_API_2.Dtos;
+namespace registerUser_API_2.Dtos.User;
 
 public record UserUpdateDto(
     string FirstName,

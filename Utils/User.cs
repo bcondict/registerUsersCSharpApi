@@ -1,6 +1,6 @@
 namespace registerUser_API_2.Utils.User;
 
-using registerUser_API_2.Dtos;
+using registerUser_API_2.Dtos.User;
 
 public static class UserDB
 {
