@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+namespace registerUser_API_2.Services.Dtos.User;
 
-namespace registerUser_API_2.Dtos.User;
+using System.ComponentModel.DataAnnotations;
 
 public record class UserDto(
     [Required][StringLength(50)] string Id,

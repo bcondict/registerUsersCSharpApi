@@ -1,13 +1,13 @@
-namespace registerUser_API_2.Endpoints;
+using registerUser_API_2.Services.Dtos.User;
+using registerUser_API_2.Services.Utils.User;
 
-using registerUser_API_2.Dtos.User;
-using registerUser_API_2.Utils.User;
+namespace registerUser_API_2.Endpoints;
 
 public static class UserEndpoints
 {
     public static RouteGroupBuilder MapUsersEndpoints(this WebApplication app, string route)
     {
-        RouteGroupBuilder group = app.MapGroup(route);
+        RouteGroupBuilder group = app.MapGroup(route).WithParameterValidation();
 
         /* GET /users - list the users */
         group.MapGet("/", () => UserDB.GetUsers());
