@@ -1,15 +1,17 @@
 using MySql.Data.MySqlClient;
 using registerUser_API_2.Services.Dtos.User;
+using registerUser_API_2.Services.Domains.User;
 
-namespace registerUser_API_2.Services.Persistence;
+namespace registerUser_API_2.Services.Persistence.User;
 
-public class MySQLPersistence
+public class UserPersistence : IUserPersistence
 {
-    private static MySQLPersistence? _instance;
+    private static UserPersistence? _instance;
     private MySqlConnection _dbConnection = new MySqlConnection();
+    public string GetUserEndpoitName { get { return "GetUser"; } }
 
 
-    public MySQLPersistence(string connString)
+    public UserPersistence(string connString)
     {
         if (_instance != null)
         {
@@ -19,6 +21,8 @@ public class MySQLPersistence
 
         _dbConnection.ConnectionString = connString;
     }
+
+
     /* create */
     public UserDto CreateUser(UserDto user)
     {
@@ -140,7 +144,8 @@ public class MySQLPersistence
         {
             // MessageBox.Show(ex.Message);
             Console.WriteLine($"Database connection error: {ex.Message}");
-            throw;
+            return "";
+            // throw;
         }
     }
 
