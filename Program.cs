@@ -13,7 +13,7 @@ string dbUserPassword = Environment.GetEnvironmentVariable("DB_USER_PWD") ?? "";
 string dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "registerUser";
 string connString = $"server={dbHost};uid={dbUser};pwd={dbUserPassword};database={dbName}";
 
-IUserPersistence persistence = new UserPersistence(connString);
+IUserPersistence persistence = UserPersistence.GetInstance(connString);
 
 app.MapUsersEndpoints("/users", persistence);
 

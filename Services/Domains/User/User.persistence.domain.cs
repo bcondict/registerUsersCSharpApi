@@ -6,6 +6,7 @@ public interface IUserPersistence
 {
     string? GetUserEndpoitName { get; }
 
+    static abstract IUserPersistence GetInstance(string connString);
     UserDto CreateUser(UserDto user);
     List<UserDto> GetUsers();
     UserDto? GetUser(string userId);

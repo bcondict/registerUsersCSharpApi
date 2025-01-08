@@ -4,14 +4,14 @@ using registerUser_API_2.Services.Domains.User;
 
 namespace registerUser_API_2.Services.Persistence.User;
 
-public class UserPersistence : IUserPersistence
+public sealed class UserPersistence : IUserPersistence
 {
-    private static UserPersistence? _instance;
+    private static IUserPersistence? _instance;
     private MySqlConnection _dbConnection = new MySqlConnection();
     public string GetUserEndpoitName { get { return "GetUser"; } }
 
 
-    public UserPersistence(string connString)
+    private UserPersistence(string connString)
     {
         if (_instance != null)
         {
@@ -22,15 +22,27 @@ public class UserPersistence : IUserPersistence
         _dbConnection.ConnectionString = connString;
     }
 
+    public static IUserPersistence GetInstance(string connString)
+    {
+        if (_instance == null)
+        {
+            _instance = new UserPersistence(connString);
+        }
+
+        return _instance;
+    }
+
 
     /* create */
     public UserDto CreateUser(UserDto user)
     {
         try
         {
+            // Console.WriteLine("User {0}", user);
             _dbConnection.Open();
-            string query = "INSERT INTO (`Id`, `FirstName`, `LastName`, `Password`, `CreatedAt`, `UpdatedAt`) VALUES (@firstName, @lastName, @password, @createdAt, @updatedAt)";
+            string query = "INSERT INTO `User` (`Id`, `FirstName`, `LastName`, `Password`, `CreatedAt`, `UpdatedAt`) VALUES (@id, @firstName, @lastName, @password, @createdAt, @updatedAt)";
             using MySqlCommand command = new MySqlCommand(query, _dbConnection);
+            command.Parameters.AddWithValue("@id", user.Id);
             command.Parameters.AddWithValue("@firstName", user.FirstName);
             command.Parameters.AddWithValue("@lastName", user.LastName);
             command.Parameters.AddWithValue("@password", user.Password);
@@ -38,9 +50,8 @@ public class UserPersistence : IUserPersistence
             command.Parameters.AddWithValue("@updatedAt", user.UpdatedAt);
 
             command.ExecuteNonQuery();
-            // using var reader = this.dbCommand.ExecuteReader();
-            // Console.WriteLine("reader {}", reader);
 
+            _dbConnection.Close();
             return user;
         }
         catch (MySql.Data.MySqlClient.MySqlException ex)
@@ -57,6 +68,27 @@ public class UserPersistence : IUserPersistence
         try
         {
             _dbConnection.Open();
+            List<UserDto> users = new List<UserDto>();
+            string query = "SELECT * FROM `User`;";
+
+
+            MySqlCommand command = new MySqlCommand(query, _dbConnection);
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    users.Add(new UserDto(
+                                reader.GetString("Id"),
+                                reader.GetString("FirstName"),
+                                reader.GetString("lastName"),
+                                reader.GetString("Password"),
+                                reader.GetDateTime("CreatedAt"),
+                                reader.GetDateTime("UpdatedAt")
+                                ));
+                }
+            }
+            _dbConnection.Close();
+            return users;
         }
         catch (MySql.Data.MySqlClient.MySqlException ex)
         {
@@ -64,27 +96,6 @@ public class UserPersistence : IUserPersistence
             Console.WriteLine($"Database connection error: {ex.Message}");
             throw;
         }
-        List<UserDto> users = new List<UserDto>();
-        string query = "SELECT * FROM `User`;";
-
-
-        MySqlCommand command = new MySqlCommand(query, _dbConnection);
-        using (MySqlDataReader reader = command.ExecuteReader())
-        {
-            while (reader.Read())
-            {
-                users.Add(new UserDto(
-                    reader.GetString("Id"),
-                    reader.GetString("FirstName"),
-                    reader.GetString("lastName"),
-                    reader.GetString("Password"),
-                    reader.GetDateTime("CreatedAt"),
-                    reader.GetDateTime("UpdatedAt")
-                ));
-            }
-        }
-        _dbConnection.Close();
-        return users;
     }
 
     /* read one */
@@ -99,7 +110,7 @@ public class UserPersistence : IUserPersistence
             using (MySqlDataReader reader = command.ExecuteReader())
                 if (reader.Read())
                 {
-                    return new UserDto
+                    UserDto user = new UserDto
                     (
                         reader.GetString("Id"),
                         reader.GetString("FirstName"),
@@ -108,6 +119,8 @@ public class UserPersistence : IUserPersistence
                         reader.GetDateTime("CreatedAt"),
                         reader.GetDateTime("UpdatedAt")
                     );
+                    _dbConnection.Close();
+                    return user;
                 }
             _dbConnection.Close();
             return null;
